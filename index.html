@@ -5471,7 +5471,20 @@ Make sure disabled buttons don't get the pointer cursor.
         </div>
     </div>
 
+    <!-- Floating Music Controller -->
+<button id="music-toggle" 
+        style="position: fixed; bottom: 25px; right: 25px; z-index: 9999; 
+               width: 55px; height: 55px; border-radius: 50%; background: linear-gradient(135deg, #ec4899, #a855f7);
+               color: white; border: none; font-size: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+               display: flex; align-items: center; justify-content: center; cursor: pointer;">
+    ♫
+</button>
 
+<!-- Background Music -->
+<audio id="birthday-music" loop>
+    <source src="BirthdayMusic.mpeg" type="audio/mpeg">
+    Your browser does not support the audio element.
+</audio>
 
     </a>
     <script type="text/javascript" crossorigin="anonymous"
@@ -5801,6 +5814,40 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 </script>>
+
+    <script>
+// Music Controller
+const music = document.getElementById('birthday-music');
+const toggleBtn = document.getElementById('music-toggle');
+
+let isPlaying = false;
+
+// Try to autoplay when page loads
+window.addEventListener('load', () => {
+    music.volume = 0.35; // Soft volume (35%)
+
+    music.play().then(() => {
+        isPlaying = true;
+        toggleBtn.textContent = '❚❚';   // Show pause icon
+    }).catch(() => {
+        // Autoplay blocked - user needs to interact
+        console.log("Autoplay blocked. Waiting for user interaction.");
+    });
+});
+
+// Toggle Play/Pause on button click
+toggleBtn.addEventListener('click', () => {
+    if (isPlaying) {
+        music.pause();
+        toggleBtn.textContent = '♫';
+        isPlaying = false;
+    } else {
+        music.play();
+        toggleBtn.textContent = '❚❚';
+        isPlaying = true;
+    }
+});
+</script>
     <script defer=""
         src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516"
         integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg=="
