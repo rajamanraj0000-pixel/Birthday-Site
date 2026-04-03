@@ -5704,12 +5704,12 @@ Make sure disabled buttons don't get the pointer cursor.
 // ==================== GOOGLE SHEET CONFIG ====================
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwaTfJQCV7EINv-D9Q3tHgkz6qM40K53WzrltsBFhRiLBwQR-CHIOjmsP847GwSog3yBA/exec";
 
-// Initial sample notes (your personal messages)
+// Initial 4 fixed notes (no delete button)
 let notes = [
-    { author: "Your Smile Lights Up Everything", message: "Your smile is so cute and pure that it creates a happy atmosphere around you. Even when many people feel jealous of your happiness, your smile has the power to make me forget all my worries. In that moment, everything feels lighter and better. Just seeing you smile makes my day." },
-    { author: "Your Dreams and Hard Work", message: "I admire how hardworking and focused you are. You push yourself so much for your studies and dream of getting a gold medal and becoming an IAS officer. Your dreams are big, and I respect them deeply. But sometimes I feel sad seeing you skip sleep, not eat properly, and take so much stress. I wish you would take care of yourself as much as you care about your goals." },
-    { author: "When They Tease Us", message: "Honestly, I don’t care when people get jealous or tease me for being with you. Because whenever I’m with you, I only think about you. We enjoy our time together, we handle difficult moments, and we laugh through everything. Maybe that’s why some people feel jealous — because they can see how comfortable and happy we are together." },
-    { author: "Your Care and My Regret", message: "I really like how caring you are. During ACE Hack, when you told me to rest because I looked tired, it touched my heart. You are so comfortable with me, and that feeling is very new and special for me. I’m sorry for the times my behaviour hurt you. All the moments we spent together — laughing, working, and talking — are truly amazing and unforgettable. You are a wonderful friend, and I never want to lose you." }
+    { author: "Your Smile Lights Up Everything", message: "Your smile is so cute and pure that it creates a happy atmosphere around you. Even when many people feel jealous of your happiness, your smile has the power to make me forget all my worries. In that moment, everything feels lighter and better. Just seeing you smile makes my day.", fixed: true },
+    { author: "Your Dreams and Hard Work", message: "I admire how hardworking and focused you are. You push yourself so much for your studies and dream of getting a gold medal and becoming an IAS officer. Your dreams are big, and I respect them deeply. But sometimes I feel sad seeing you skip sleep, not eat properly, and take so much stress. I wish you would take care of yourself as much as you care about your goals.", fixed: true },
+    { author: "When They Tease Us", message: "Honestly, I don’t care when people get jealous or tease me for being with you. Because whenever I’m with you, I only think about you. We enjoy our time together, we handle difficult moments, and we laugh through everything. Maybe that’s why some people feel jealous — because they can see how comfortable and happy we are together.", fixed: true },
+    { author: "Your Care and My Regret", message: "I really like how caring you are. During ACE Hack, when you told me to rest because I looked tired, it touched my heart. You are so comfortable with me, and that feeling is very new and special for me. I’m sorry for the times my behaviour hurt you. All the moments we spent together — laughing, working, and talking — are truly amazing and unforgettable. You are a wonderful friend, and I never want to lose you.", fixed: true }
 ];
 
 function renderNotes() {
@@ -5721,9 +5721,14 @@ function renderNotes() {
                           index % 4 === 1 ? 'bg-purple-100 border-purple-300' : 
                           index % 4 === 2 ? 'bg-yellow-100 border-yellow-300' : 'bg-blue-100 border-blue-300';
 
+        let deleteBtn = '';
+        if (!note.fixed) {
+            deleteBtn = `<button class="delete-btn absolute top-4 right-4 text-red-500 hover:text-red-700 text-xl font-bold" data-index="${index}" style="background:none; border:none; cursor:pointer;">✕</button>`;
+        }
+
         const noteHTML = `
-            <div class="note-card p-6 rounded-2xl border-2 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${colorClass}">
-                <div class="flex items-start gap-4 relative">
+            <div class="note-card p-6 rounded-2xl border-2 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${colorClass} relative">
+                <div class="flex items-start gap-4">
                     <div class="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 shadow-md text-2xl 
                                 ${index % 4 === 0 ? 'bg-pink-400' : index % 4 === 1 ? 'bg-purple-400' : index % 4 === 2 ? 'bg-yellow-400' : 'bg-blue-400'}">
                         👤
@@ -5732,37 +5737,28 @@ function renderNotes() {
                         <h4 class="text-lg font-bold text-purple-900 mb-3">${note.author}</h4>
                         <p class="text-purple-800 leading-relaxed font-normal italic">"${note.message}"</p>
                     </div>
-                    <!-- Cross Button -->
-                    <button class="delete-btn absolute top-4 right-4 text-red-500 hover:text-red-700 text-xl font-bold" 
-                            data-index="${index}" style="background:none; border:none; cursor:pointer;">
-                        ✕
-                    </button>
+                    ${deleteBtn}
                 </div>
             </div>
         `;
         container.innerHTML += noteHTML;
     });
 
-    // Add delete functionality
+    // Add delete functionality only for new wishes
     document.querySelectorAll('.delete-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             const index = parseInt(this.getAttribute('data-index'));
-            if (confirm("Are you sure you want to delete this wish?")) {
-                notes.splice(index, 1);
-                renderNotes();
-            }
+            notes.splice(index, 1);
+            renderNotes();
         });
     });
-}
+};
 
-// Submit new wish to Google Sheet
+// Submit wish to Google Sheet (silent - no alert)
 document.getElementById('submit-wish-btn').addEventListener('click', () => {
     const message = document.getElementById('wish-textarea').value.trim();
 
-    if (message === '') {
-        alert("Please type your wish before adding ❤️");
-        return;
-    }
+    if (message === '') return;
 
     const formData = new FormData();
     formData.append("Wish", message);
@@ -5772,27 +5768,21 @@ document.getElementById('submit-wish-btn').addEventListener('click', () => {
         method: "POST",
         body: formData,
         mode: "no-cors"
-    })
-    .then(() => {
-        alert("🎉 Your wish has been saved permanently in the cloud!");
-        
-        // Add to local display too
-        notes.unshift({
-            author: "You",
-            message: message
-        });
-        
-        renderNotes();
-
-        // Reset form
-        document.getElementById('wish-textarea').value = '';
-        document.getElementById('wish-form').classList.add('hidden');
-        document.getElementById('add-button-container').classList.remove('hidden');
-    })
-    .catch(err => {
-        console.error(err);
-        alert("Failed to save wish. Please check your internet.");
     });
+
+    // Add to display immediately
+    notes.unshift({
+        author: "You",
+        message: message,
+        fixed: false
+    });
+
+    renderNotes();
+
+    // Reset form silently
+    document.getElementById('wish-textarea').value = '';
+    document.getElementById('wish-form').classList.add('hidden');
+    document.getElementById('add-button-container').classList.remove('hidden');
 });
 
 // Initialize
@@ -5810,7 +5800,7 @@ document.addEventListener('DOMContentLoaded', () => {
         textarea.focus();
     });
 });
-</script>
+</script>>
     <script defer=""
         src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516"
         integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg=="
