@@ -5815,35 +5815,37 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>>
 
-    <script>
+<script>
 // Music Controller
 const music = document.getElementById('birthday-music');
 const toggleBtn = document.getElementById('music-toggle');
 
-let isPlaying = false;
+let isPlaying = true;   // Start with true because we want auto-play
 
-// Try to autoplay when page loads
+// Auto play when page loads
 window.addEventListener('load', () => {
-    music.volume = 0.35; // Soft volume (35%)
+    music.volume = 0.35;     // Soft volume
 
     music.play().then(() => {
         isPlaying = true;
-        toggleBtn.textContent = '❚❚';   // Show pause icon
+        toggleBtn.textContent = '❚❚';   // Show pause icon initially
     }).catch(() => {
-        // Autoplay blocked - user needs to interact
-        console.log("Autoplay blocked. Waiting for user interaction.");
+        // If autoplay is blocked by browser
+        isPlaying = false;
+        toggleBtn.textContent = '♫';
+        console.log("Autoplay blocked by browser");
     });
 });
 
-// Toggle Play/Pause on button click
+// Toggle Play / Pause
 toggleBtn.addEventListener('click', () => {
     if (isPlaying) {
         music.pause();
-        toggleBtn.textContent = '♫';
+        toggleBtn.textContent = '♫';      // Show play icon
         isPlaying = false;
     } else {
         music.play();
-        toggleBtn.textContent = '❚❚';
+        toggleBtn.textContent = '❚❚';    // Show pause icon
         isPlaying = true;
     }
 });
